@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-
+import axios from 'axios';
 import './App.css';
 
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
+import Post from './Post/Post'
+
+const baseUrl = 'https://practiceapi.devmountain.com/api/posts';
 
 class App extends Component {
   constructor() {
@@ -19,19 +22,27 @@ class App extends Component {
   }
   
   componentDidMount() {
-
+    axios.get(baseUrl).then( results => {
+      this.setState({ posts: results.data });
+    });
   }
 
-  updatePost() {
-  
+  updatePost(id,text) {
+    axios.put('${baseUrl}/id={id}', {text}).then(results => {
+      this.setState({post: results.data});
+    });
   }
 
-  deletePost() {
-
+  deletePost(id) {
+    axios.delete('${baseUrl}/id={id}').then(results=>{
+      this.setState({post: results.data})
+    })
   }
 
-  createPost() {
-
+  createPost(text) {
+    axios.post(baseUrl,{text}).then(results => {
+      this.setState({ posts: results.data });
+    })
   }
 
   render() {
@@ -43,7 +54,18 @@ class App extends Component {
 
         <section className="App__content">
 
-          <Compose />
+        <Compose createPostFn={ this.createPost } />
+
+          {
+            posts.map(post => (
+              <Post key={post.id}
+                    text={post.text}
+                    date={post.date}
+                    id={post.id}
+                    updatePostFn={this.updatePost}
+                    deletePostFn={this.deletePost}/>
+            ))
+          }
           
         </section>
       </div>
